@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CLONET — Network Recon Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css"/>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-logo">⬡</span>
+      <span class="brand-name">CLONET</span>
+      <span class="brand-tag">Network Recon Dashboard</span>
+    </div>
+    <div class="status-strip">
+      <span class="status-dot"></span>
+      <span id="status-text">Ready</span>
+      <span class="divider">|</span>
+      <span id="clock"></span>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="sidebar">
+
+      <div class="panel">
+        <div class="panel-title">Target</div>
+        <input type="text" id="target-input" class="target-input"
+          placeholder="IP or domain..." autocomplete="off" spellcheck="false"/>
+        <div class="hint">e.g. 192.168.1.1 or example.com</div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">Modules</div>
+        <nav class="module-nav">
+          <button class="module-btn mod-auto active" data-module="autoscan">
+            <span class="mod-icon">⬡</span><span class="mod-label">Auto Scan (All)</span>
+          </button>
+          <div class="mod-divider"></div>
+          <button class="module-btn" data-module="portscan">
+            <span class="mod-icon">◈</span><span class="mod-label">Port Scanner</span>
+          </button>
+          <button class="module-btn" data-module="subdomain">
+            <span class="mod-icon">◈</span><span class="mod-label">Subdomain Finder</span>
+          </button>
+          <button class="module-btn" data-module="ssl">
+            <span class="mod-icon">◈</span><span class="mod-label">SSL / TLS</span>
+          </button>
+          <button class="module-btn" data-module="whois">
+            <span class="mod-icon">◈</span><span class="mod-label">WHOIS Lookup</span>
+          </button>
+          <button class="module-btn" data-module="dns">
+            <span class="mod-icon">◈</span><span class="mod-label">DNS Enumeration</span>
+          </button>
+          <button class="module-btn" data-module="headers">
+            <span class="mod-icon">◈</span><span class="mod-label">Header Analysis</span>
+          </button>
+          <button class="module-btn" data-module="techstack">
+            <span class="mod-icon">◈</span><span class="mod-label">Tech Stack</span>
+          </button>
+        </nav>
+      </div>
+
+      <!-- Port scanner options -->
+      <div class="panel module-options" id="portscan-options" style="display:none">
+        <div class="panel-title">Scan Options</div>
+        <label class="opt-label">Port Range</label>
+        <input type="text" id="port-range" class="opt-input" value="1-1000"/>
+        <label class="opt-label">Speed</label>
+        <select id="scan-speed" class="opt-select">
+          <option value="slow">Slow — Polite / IDS evasion</option>
+          <option value="normal" selected>Normal — Default</option>
+          <option value="fast">Fast — CTF / Lab use</option>
+        </select>
+      </div>
+
+      <!-- Subdomain options -->
+      <div class="panel module-options" id="subdomain-options" style="display:none">
+        <div class="panel-title">Wordlist</div>
+        <select id="sub-wordlist" class="opt-select">
+          <option value="default" selected>Default (~120 words, fast)</option>
+          <option value="large">Large (~180 words, thorough)</option>
+        </select>
+      </div>
+
+      <!-- Auto scan options -->
+      <div class="panel module-options" id="autoscan-options">
+        <div class="panel-title">Auto Scan Options</div>
+        <label class="opt-label">Port Range</label>
+        <input type="text" id="auto-port-range" class="opt-input" value="1-1000"/>
+        <div class="hint" style="margin-top:8px">Runs all 7 modules in sequence</div>
+      </div>
+
+      <button class="run-btn" id="run-btn">
+        <span id="run-label">▶ RUN SCAN</span>
+      </button>
+
+    </aside>
+
+    <section class="results-pane">
+      <div id="results-placeholder" class="results-placeholder">
+        <div class="placeholder-icon">⬡</div>
+        <div class="placeholder-text">Select a module and enter a target to begin</div>
+        <div class="placeholder-sub">All scan data stays local — nothing is logged</div>
+      </div>
+      <div class="output-area" id="output-area"></div>
+    </section>
+  </main>
+
+  <footer class="log-strip">
+    <span class="log-label">LOG</span>
+    <div class="log-entries" id="log-entries">
+      <span class="log-entry">CLONET initialized. 8 modules loaded.</span>
+    </div>
+  </footer>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

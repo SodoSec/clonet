@@ -1,0 +1,6 @@
+flask==3.0.3
+python-whois==0.9.4
+dnspython==2.6.1
+requests==2.32.3
+python-nmap==0.7.1
+urllib3==2.2.1
