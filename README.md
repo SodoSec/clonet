@@ -5,6 +5,9 @@ Built by CLONE | Python · Flask · Vanilla JS
 
 CLONET is a lightweight, self-hosted recon dashboard that automates early-stage external penetration testing tasks.
 
+![CLONET Dashboard](screenshot.png)<img width="1907" height="906" alt="c1" src="https://github.com/user-attachments/assets/d65947a1-ea7c-4573-928c-1c8a3a8e042b" />
+
+
 ## Modules
 | Module | What it does |
 |--------|-------------|
