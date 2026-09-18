@@ -6,6 +6,56 @@
   <title>CLONET — Network Recon Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/css/style.css"/>
+  <style>
+    /* Inline checkbox rows in module list */
+    .module-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .module-row .module-btn {
+      flex: 1;
+    }
+    .mod-checkbox {
+      accent-color: var(--accent);
+      width: 15px;
+      height: 15px;
+      cursor: pointer;
+      flex-shrink: 0;
+      opacity: 0.7;
+      transition: opacity 0.15s;
+    }
+    .mod-checkbox:checked {
+      opacity: 1;
+    }
+    /* Only show checkboxes when Auto Scan is active */
+    .module-nav .mod-checkbox {
+      display: none;
+    }
+    .module-nav.autoscan-active .mod-checkbox {
+      display: block;
+    }
+    .check-links {
+      display: none;
+      gap: 8px;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+    }
+    .module-nav.autoscan-active ~ .check-links {
+      display: flex;
+    }
+    .check-link {
+      font-size: 11px;
+      color: var(--accent-dim);
+      cursor: pointer;
+      font-family: var(--font-mono);
+      background: none;
+      border: none;
+      padding: 0;
+    }
+    .check-link:hover { color: var(--accent); }
+  </style>
 </head>
 <body>
   <header class="topbar">
@@ -34,33 +84,76 @@
 
       <div class="panel">
         <div class="panel-title">Modules</div>
-        <nav class="module-nav">
+
+        <!-- Auto Scan button — no checkbox -->
+        <nav class="module-nav autoscan-active" id="module-nav">
+
           <button class="module-btn mod-auto active" data-module="autoscan">
-            <span class="mod-icon">⬡</span><span class="mod-label">Auto Scan (All)</span>
+            <span class="mod-icon">⬡</span>
+            <span class="mod-label">Auto Scan</span>
           </button>
+
           <div class="mod-divider"></div>
-          <button class="module-btn" data-module="portscan">
-            <span class="mod-icon">◈</span><span class="mod-label">Port Scanner</span>
-          </button>
-          <button class="module-btn" data-module="subdomain">
-            <span class="mod-icon">◈</span><span class="mod-label">Subdomain Finder</span>
-          </button>
-          <button class="module-btn" data-module="ssl">
-            <span class="mod-icon">◈</span><span class="mod-label">SSL / TLS</span>
-          </button>
-          <button class="module-btn" data-module="whois">
-            <span class="mod-icon">◈</span><span class="mod-label">WHOIS Lookup</span>
-          </button>
-          <button class="module-btn" data-module="dns">
-            <span class="mod-icon">◈</span><span class="mod-label">DNS Enumeration</span>
-          </button>
-          <button class="module-btn" data-module="headers">
-            <span class="mod-icon">◈</span><span class="mod-label">Header Analysis</span>
-          </button>
-          <button class="module-btn" data-module="techstack">
-            <span class="mod-icon">◈</span><span class="mod-label">Tech Stack</span>
-          </button>
+
+          <!-- Each module row: checkbox + button -->
+          <div class="module-row">
+            <input type="checkbox" class="mod-checkbox" value="ports" id="chk-ports" checked title="Include in Auto Scan"/>
+            <button class="module-btn" data-module="portscan">
+              <span class="mod-icon">◈</span><span class="mod-label">Port Scanner</span>
+            </button>
+          </div>
+
+          <div class="module-row">
+            <input type="checkbox" class="mod-checkbox" value="subdomains" id="chk-subdomains" checked title="Include in Auto Scan"/>
+            <button class="module-btn" data-module="subdomain">
+              <span class="mod-icon">◈</span><span class="mod-label">Subdomain Finder</span>
+            </button>
+          </div>
+
+          <div class="module-row">
+            <input type="checkbox" class="mod-checkbox" value="ssl" id="chk-ssl" checked title="Include in Auto Scan"/>
+            <button class="module-btn" data-module="ssl">
+              <span class="mod-icon">◈</span><span class="mod-label">SSL / TLS</span>
+            </button>
+          </div>
+
+          <div class="module-row">
+            <input type="checkbox" class="mod-checkbox" value="whois" id="chk-whois" checked title="Include in Auto Scan"/>
+            <button class="module-btn" data-module="whois">
+              <span class="mod-icon">◈</span><span class="mod-label">WHOIS Lookup</span>
+            </button>
+          </div>
+
+          <div class="module-row">
+            <input type="checkbox" class="mod-checkbox" value="dns" id="chk-dns" checked title="Include in Auto Scan"/>
+            <button class="module-btn" data-module="dns">
+              <span class="mod-icon">◈</span><span class="mod-label">DNS Enumeration</span>
+            </button>
+          </div>
+
+          <div class="module-row">
+            <input type="checkbox" class="mod-checkbox" value="headers" id="chk-headers" checked title="Include in Auto Scan"/>
+            <button class="module-btn" data-module="headers">
+              <span class="mod-icon">◈</span><span class="mod-label">Header Analysis</span>
+            </button>
+          </div>
+
+          <div class="module-row">
+            <input type="checkbox" class="mod-checkbox" value="techstack" id="chk-techstack" checked title="Include in Auto Scan"/>
+            <button class="module-btn" data-module="techstack">
+              <span class="mod-icon">◈</span><span class="mod-label">Tech Stack</span>
+            </button>
+          </div>
+
         </nav>
+
+        <!-- Select all / Clear all — only visible in auto scan mode -->
+        <div class="check-links" id="check-links">
+          <button class="check-link" onclick="selectAllMods()">Select all</button>
+          <span style="color:var(--text-muted)">·</span>
+          <button class="check-link" onclick="clearAllMods()">Clear all</button>
+        </div>
+
       </div>
 
       <!-- Port scanner options -->
@@ -80,17 +173,16 @@
       <div class="panel module-options" id="subdomain-options" style="display:none">
         <div class="panel-title">Wordlist</div>
         <select id="sub-wordlist" class="opt-select">
-          <option value="default" selected>Default (~120 words, fast)</option>
-          <option value="large">Large (~180 words, thorough)</option>
+          <option value="default" selected>Default (~120 words)</option>
+          <option value="large">Large (~180 words)</option>
         </select>
       </div>
 
-      <!-- Auto scan options -->
+      <!-- Auto scan port range -->
       <div class="panel module-options" id="autoscan-options">
-        <div class="panel-title">Auto Scan Options</div>
-        <label class="opt-label">Port Range</label>
+        <div class="panel-title">Port Range</div>
         <input type="text" id="auto-port-range" class="opt-input" value="1-1000"/>
-        <div class="hint" style="margin-top:8px">Runs all 7 modules in sequence</div>
+        <div class="hint" style="margin-top:6px">Checkboxes select which modules run</div>
       </div>
 
       <button class="run-btn" id="run-btn">
@@ -102,7 +194,7 @@
     <section class="results-pane">
       <div id="results-placeholder" class="results-placeholder">
         <div class="placeholder-icon">⬡</div>
-        <div class="placeholder-text">Select a module and enter a target to begin</div>
+        <div class="placeholder-text">Select modules and enter a target to begin</div>
         <div class="placeholder-sub">All scan data stays local — nothing is logged</div>
       </div>
       <div class="output-area" id="output-area"></div>
@@ -116,6 +208,14 @@
     </div>
   </footer>
 
+  <script>
+    function selectAllMods() {
+      document.querySelectorAll(".mod-checkbox").forEach(c => c.checked = true);
+    }
+    function clearAllMods() {
+      document.querySelectorAll(".mod-checkbox").forEach(c => c.checked = false);
+    }
+  </script>
   <script src="/static/js/app.js"></script>
 </body>
 </html>
