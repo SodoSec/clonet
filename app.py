@@ -24,7 +24,7 @@ def api_portscan():
     data = request.json
     target = data.get("target","").strip()
     if not target: return jsonify({"error":"No target"}), 400
-    result = run_port_scan(target, data.get("range","1-1000"), data.get("speed","normal"))
+    result = run_port_scan(target, data.get("range","1-1000"), data.get("speed","normal"), data.get("scan_udp", False))
     result["timestamp"] = ts()
     return jsonify(result)
 

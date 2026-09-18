@@ -90,7 +90,7 @@ def run_autoscan(target: str, port_range: str = "1-1000") -> dict:
 
     # ── 7. PORT SCAN ─────────────────────────────────────────
     try:
-        results["ports"] = run_port_scan(clean, port_range=port_range, speed="normal")
+        results["ports"] = run_port_scan(clean, port_range=port_range, speed="normal", scan_udp=False)
     except Exception as e:
         errors["ports"] = str(e)
 

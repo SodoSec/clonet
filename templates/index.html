@@ -167,6 +167,12 @@
           <option value="normal" selected>Normal — Default</option>
           <option value="fast">Fast — CTF / Lab use</option>
         </select>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border)">
+          <input type="checkbox" id="udp-scan" style="accent-color:var(--accent);width:14px;height:14px;cursor:pointer"/>
+          <label for="udp-scan" style="font-family:var(--font-ui);font-size:13px;font-weight:500;color:var(--text-secondary);cursor:pointer;letter-spacing:1px">UDP Scan</label>
+          <span style="font-size:10px;color:var(--text-muted);font-family:var(--font-mono)">(needs sudo)</span>
+        </div>
+        <div style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);margin-top:4px">Checks DNS,SNMP,NTP,TFTP,NetBIOS...</div>
       </div>
 
       <!-- Subdomain options -->

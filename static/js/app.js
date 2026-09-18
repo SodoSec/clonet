@@ -82,7 +82,11 @@ runBtn.addEventListener("click", async () => {
   try {
     let result;
     if (activeModule === "autoscan") { await runAutoScan(target); return; }
-    else if (activeModule === "portscan") { result = await apiCall("/api/portscan", {target, range: document.getElementById("port-range").value||"1-1000", speed: document.getElementById("scan-speed").value||"normal"}); renderPortScan(result, target); }
+    else if (activeModule === "portscan") {
+      const scanUdp = document.getElementById("udp-scan")?.checked || false;
+      result = await apiCall("/api/portscan", {target, range: document.getElementById("port-range").value||"1-1000", speed: document.getElementById("scan-speed").value||"normal", scan_udp: scanUdp});
+      renderPortScan(result, target);
+    }
     else if (activeModule === "subdomain") { result = await apiCall("/api/subdomain", {target, wordlist: document.getElementById("sub-wordlist").value||"default"}); renderSubdomain(result, target); }
     else if (activeModule === "ssl") { result = await apiCall("/api/ssl", {target}); renderSSL(result, target); }
     else if (activeModule === "whois") { result = await apiCall("/api/whois", {target}); renderWhois(result, target); }
@@ -333,18 +337,46 @@ function exportJSON() {
 // Individual module renders — all escaped
 function renderPortScan(data, target) {
   if (!data.success) { outputArea.innerHTML=`<div class="error-box">⚠ ${esc(data.error)}</div>`; return; }
-  log(`Port scan — ${data.total_open} open ports`,"ok");
+  const udpCount = data.total_udp || 0;
+  log(`Port scan — ${data.total_open} TCP open, ${udpCount} UDP open`,"ok");
   const risky=[21,23,445,3389,5900,6379,27017];
+  const riskyUdp=[161,69,137,138,53];
   let html=`<div class="result-header"><div class="result-title">Port Scan</div><div class="result-target">${esc(data.target)}</div>
-  <div class="result-meta">Resolved: ${esc(data.resolved_ip)} | Range: ${esc(data.port_range)} | ${esc(data.timestamp)}</div></div>
-  <div class="stats-row"><div class="stat-card"><div class="stat-label">Open Ports</div><div class="stat-value ${data.total_open>0?"accent":"green"}">${data.total_open}</div></div>
-  <div class="stat-card"><div class="stat-label">Status</div><div class="stat-value green">${esc(data.host_status||"up")}</div></div></div>`;
-  if (!data.open_ports.length) html+=`<div class="error-box" style="color:var(--amber)">No open ports in range ${esc(data.port_range)}</div>`;
-  else {
-    html+=`<div class="section-title">Open Ports</div><table class="data-table"><thead><tr><th>Port</th><th>State</th><th>Service</th><th>Notes</th></tr></thead><tbody>`;
-    for (const p of data.open_ports) { const c=risky.includes(p.port)?"color:var(--red)":"color:var(--green)"; html+=`<tr><td style="${c};font-weight:600">${p.port}</td><td><span class="badge badge-green">OPEN</span></td><td>${esc(p.service||"—")}</td><td class="port-note">${esc(p.note||"—")}</td></tr>`; }
+  <div class="result-meta">Resolved: ${esc(data.resolved_ip)} | TCP Range: ${esc(data.port_range)} | UDP: ${data.udp_scanned?"Yes":"No"} | ${esc(data.timestamp)}</div></div>
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-label">TCP Open</div><div class="stat-value ${data.total_open>0?"accent":"green"}">${data.total_open}</div></div>
+    <div class="stat-card"><div class="stat-label">UDP Open</div><div class="stat-value ${udpCount>0?"amber":"green"}">${data.udp_scanned?udpCount:"—"}</div></div>
+    <div class="stat-card"><div class="stat-label">Status</div><div class="stat-value green">${esc(data.host_status||"up")}</div></div>
+  </div>`;
+
+  // TCP results
+  if (!data.open_ports.length) {
+    html+=`<div class="error-box" style="color:var(--amber)">No open TCP ports in range ${esc(data.port_range)}</div>`;
+  } else {
+    html+=`<div class="section-title">TCP Open Ports (${data.total_open})</div><table class="data-table"><thead><tr><th>Port</th><th>Proto</th><th>Service</th><th>Notes</th></tr></thead><tbody>`;
+    for (const p of data.open_ports) {
+      const c=risky.includes(p.port)?"color:var(--red)":"color:var(--green)";
+      html+=`<tr><td style="${c};font-weight:600">${p.port}</td><td style="color:var(--text-muted)">TCP</td><td>${esc(p.service||"—")}</td><td class="port-note">${esc(p.note||"—")}</td></tr>`;
+    }
     html+=`</tbody></table>`;
   }
+
+  // UDP results
+  if (data.udp_scanned) {
+    if (data.udp_error) {
+      html+=`<div class="error-box" style="color:var(--amber);margin-top:12px">⚠ ${esc(data.udp_error)}</div>`;
+    } else if (!data.open_udp?.length) {
+      html+=`<div class="section-title">UDP Ports</div><div style="color:var(--text-muted);font-family:var(--font-mono);font-size:13px;margin-bottom:20px">No open UDP ports found on common ports</div>`;
+    } else {
+      html+=`<div class="section-title">UDP Open Ports (${udpCount})</div><table class="data-table"><thead><tr><th>Port</th><th>Proto</th><th>State</th><th>Service</th><th>Notes</th></tr></thead><tbody>`;
+      for (const p of data.open_udp) {
+        const c=riskyUdp.includes(p.port)?"color:var(--amber)":"color:var(--green)";
+        html+=`<tr><td style="${c};font-weight:600">${p.port}</td><td style="color:var(--text-muted)">UDP</td><td style="font-size:12px;color:var(--text-secondary)">${esc(p.state)}</td><td>${esc(p.service||"—")}</td><td class="port-note">${esc(p.note||"—")}</td></tr>`;
+      }
+      html+=`</tbody></table>`;
+    }
+  }
+
   outputArea.innerHTML=html;
 }
 

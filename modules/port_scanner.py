@@ -33,22 +33,22 @@ COMMON_PORTS = {
     27017: "MongoDB — often unauthenticated",
 }
 
-def run_port_scan(target: str, port_range: str = "1-1000", speed: str = "normal") -> dict:
+def run_port_scan(target: str, port_range: str = "1-1000", speed: str = "normal", scan_udp: bool = False) -> dict:
     try:
         resolved_ip = socket.gethostbyname(target)
     except socket.gaierror:
-        return {"success": False, "error": f"Could not resolve host: {target}", "target": target}
+        return {"success": False, "error": f"Could not resolve: {target}", "target": target}
 
-    timing_flag = SPEED_PROFILES.get(speed, "-T3")
-    nmap_args = f"-sV --open {timing_flag}"
-    if speed == "stealth":
-        nmap_args = "-sS -sV --open"
-
+    timing = SPEED_PROFILES.get(speed, "-T3")
     nm = nmap.PortScanner()
+    tcp_args = f"-sV --open {timing}"
+    if speed == "stealth":
+        tcp_args = "-sS -sV --open"
+
     try:
-        nm.scan(hosts=target, ports=port_range, arguments=nmap_args)
+        nm.scan(hosts=target, ports=port_range, arguments=tcp_args)
     except nmap.PortScannerError as e:
-        return {"success": False, "error": f"nmap error: {str(e)}. Is nmap installed?", "target": target}
+        return {"success": False, "error": f"nmap error: {str(e)}", "target": target}
     except Exception as e:
         return {"success": False, "error": str(e), "target": target}
 
@@ -60,20 +60,21 @@ def run_port_scan(target: str, port_range: str = "1-1000", speed: str = "normal"
     if "tcp" in nm[host_key]:
         for port, info in nm[host_key]["tcp"].items():
             if info["state"] == "open":
-                service_name = info.get("name", "unknown")
+                svc = info.get("name", "unknown")
                 product = info.get("product", "")
                 version = info.get("version", "")
-                service_string = service_name
+                svc_str = svc
                 if product:
-                    service_string += f" ({product} {version})".strip()
+                    svc_str += f" ({product} {version})".strip()
                 open_ports.append({
-                    "port":    port,
-                    "state":   "open",
-                    "service": service_string,
-                    "note":    COMMON_PORTS.get(port, ""),
+                    "port":     port,
+                    "protocol": "tcp",
+                    "state":    "open",
+                    "service":  svc_str,
+                    "note":     COMMON_PORTS.get(port, ""),
                 })
-
     open_ports.sort(key=lambda x: x["port"])
+
     return {
         "success":     True,
         "target":      target,
@@ -81,6 +82,10 @@ def run_port_scan(target: str, port_range: str = "1-1000", speed: str = "normal"
         "port_range":  port_range,
         "speed":       speed,
         "open_ports":  open_ports,
+        "open_udp":    [],
         "total_open":  len(open_ports),
+        "total_udp":   0,
+        "udp_scanned": False,
+        "udp_error":   None,
         "host_status": nm[host_key].state(),
     }
