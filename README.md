@@ -20,7 +20,7 @@ CLONET is a lightweight, self-hosted recon dashboard that automates early-stage 
 
 ## Installation
 ```bash
-git clone https://github.com/YOUR_HANDLE/clonet.git
+git clone https://github.com/SodoSec/clonet.git
 cd clonet
 python -m venv venv && source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
